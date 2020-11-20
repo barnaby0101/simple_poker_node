@@ -1,6 +1,13 @@
+/* 
+    TODO - have to finish deciding between two 2-pair hands. I believe I have it correctly
+    writing the values to score.highCard and score.secondHighCard. I need to set up a special 
+    test, like
+        if playerHand and dealerHand are both two pair, compare highCard and secondHighCard. 
+*/
+
+
 "use strict";
 
-// import modules 
 import * as cards from "./modules/cards.mjs";
 import * as scoring from "./modules/scoring.mjs";
 
@@ -8,24 +15,22 @@ import * as scoring from "./modules/scoring.mjs";
 const dealButton = document.querySelector("#dealButton");
 const foldButton = document.querySelector("#foldButton");
 const callButton = document.querySelector("#callButton");
-// const testButton = document.querySelector("#testButton"); // TODO remove
 const playerHandDisplay = document.querySelector("#playerHandDisplay");
 const dealerHandDisplay = document.querySelector("#dealerHandDisplay");
 const messageDisplay = document.querySelector("#messageDisplay");
 var deck, playerHand, dealerHand = new Array;
-var GAMEINPROGRESS = false; // maybe update to multiple status
-
-const temp = "You are that pig"; // TODO erase
-
+var GAMEINPROGRESS = false;
 
 // event listeners
 dealButton.addEventListener("click", () => { playGame(); } );   
 foldButton.addEventListener("click", () => { fold(); } );
 callButton.addEventListener("click", () => { call(); } );
-// testButton.addEventListener("click", () => { test(); } ); // TODO remove
 
-// Page Setup
+// Setup
+
 hideAllDisplayElements();
+
+// Game Play
 
 function playGame() {
     if (GAMEINPROGRESS === true) {
@@ -36,33 +41,13 @@ function playGame() {
 
     GAMEINPROGRESS = true;
     console.log("New game started.");
-
-    deck = getShuffledDeck();
+    deck = cards.getShuffledDeck();
     foldButton.style.display = "inline";
     deal();
     // setTimeout(() => { updateMessage("Would you like to trade in cards?") }, 1700)
     initializeTradeIn();   
 }
 
-function getShuffledDeck() { 
-    let d = Array.from(cards.allCards);
-    return randomize(d);
-}
-
-function randomize(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-    while (0 !== currentIndex) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-    return array;
-}
-
-
-// Game Play
 function deal() {
     if  (document.querySelector("#playerCards")) {          // if hand already exists, erase it
         playerCards.parentNode.removeChild(playerCards);
@@ -88,7 +73,7 @@ function createHand() {                                     // creates five-card
 }
 
 function showPlayerHand() {
-    playerHandDisplay.style.display = "block";             // display hidden element
+    playerHandDisplay.style.display = "block";
     let handList = document.createElement("ul");
     playerHandDisplay.appendChild(handList);
     handList.id="playerCards";
@@ -147,10 +132,6 @@ function initializeTradeIn() {
 }
 
 function fold() {
-    // if (GAMEINPROGRESS === false) return;
-    // if (confirm('Are you sure you want to fold?') === true) { 
-    //     // do nothing
-    // } else { return; };
     console.log("Player folded.")
     console.log("Player hand: " + playerHand);      // TODO remove
     scoring.scoreHand(playerHand);                  // TODO remove
@@ -161,13 +142,6 @@ function fold() {
     playerCards.parentNode.removeChild(playerCards);
     dealerCards.parentNode.removeChild(dealerCards);
     hideAllDisplayElements();
-}
-
-function hideAllDisplayElements() {
-    playerHandDisplay.style.display = "none";                  // hide display elements till needed
-    dealerHandDisplay.style.display = "none";
-    messageDisplay.style.display = "none";
-    foldButton.style.display = "none";
 }
 
 function call() {
@@ -188,6 +162,13 @@ function call() {
     console.log(scoring.scoreHand(playerHand));
     console.log("Dealer hand: ")
     console.log(scoring.scoreHand(dealerHand));
+}
+
+function hideAllDisplayElements() {
+    playerHandDisplay.style.display = "none";                  // hide display elements till needed
+    dealerHandDisplay.style.display = "none";
+    messageDisplay.style.display = "none";
+    foldButton.style.display = "none";
 }
 
 function getResultMessage(score){
@@ -303,12 +284,3 @@ function resultsHighCardMessager(score) {
             break;
     }
 }
-
-// function test() {       // TODO remove
-//     let straight = [cards.heartsJack, cards.clubs10, cards.hearts9, cards.spades8, cards.hearts7];
-//     let twoPair = [cards.heartsJack, cards.clubs10, cards.hearts10, cards.spades3, cards.hearts3];
-//     let pair = [cards.heartsJack, cards.clubs10, cards.hearts10, cards.spades3, cards.heartsAce];
-//     let threeOfAKind = [cards.heartsJack, cards.clubs10, cards.hearts10, cards.spades10, cards.heartsAce];
-//     let fullHouse = [cards.spadesAce, cards.clubs10, cards.hearts10, cards.spades10, cards.heartsAce];
-//     scoring.scoreHand(twoPair);
-// }
