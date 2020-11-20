@@ -12,10 +12,10 @@ const callButton = document.querySelector("#callButton");
 const playerHandDisplay = document.querySelector("#playerHandDisplay");
 const dealerHandDisplay = document.querySelector("#dealerHandDisplay");
 const messageDisplay = document.querySelector("#messageDisplay");
-
-var deck = cards.getShuffledDeck();
-var playerHand, dealerHand = [];
+var deck, playerHand, dealerHand = new Array;
 var GAMEINPROGRESS = false; // maybe update to multiple status
+
+const temp = "You are that pig"; // TODO erase
 
 
 // event listeners
@@ -24,7 +24,7 @@ foldButton.addEventListener("click", () => { fold(); } );
 callButton.addEventListener("click", () => { call(); } );
 // testButton.addEventListener("click", () => { test(); } ); // TODO remove
 
-// page setup 
+// Page Setup
 hideAllDisplayElements();
 
 function playGame() {
@@ -37,19 +37,54 @@ function playGame() {
     GAMEINPROGRESS = true;
     console.log("New game started.");
 
+    deck = getShuffledDeck();
     foldButton.style.display = "inline";
     deal();
     // setTimeout(() => { updateMessage("Would you like to trade in cards?") }, 1700)
-    initializeTradeIn();
-    
+    initializeTradeIn();   
 }
 
+function getShuffledDeck() { 
+    let d = Array.from(cards.allCards);
+    return randomize(d);
+}
+
+function randomize(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+    return array;
+}
+
+
+// Game Play
 function deal() {
-    playerHand = new cards.createHand();
+    if  (document.querySelector("#playerCards")) {          // if hand already exists, erase it
+        playerCards.parentNode.removeChild(playerCards);
+        dealerCards.parentNode.removeChild(dealerCards);
+        messageDisplay.innerHTML = "";
+    }
+
+    callButton.style.display = "inline";
+
+    playerHand = new createHand();
     showPlayerHand();
 
-    dealerHand = new cards.createHand();
+    dealerHand = new createHand();
     showDealerHandHidden();
+}
+
+function createHand() {                                     // creates five-card hands
+    var hand = new Array;
+    for (let i = 0; i < 5; i++ ) {
+        hand.push(deck.pop());
+    }
+    return hand;
 }
 
 function showPlayerHand() {
@@ -112,7 +147,7 @@ function initializeTradeIn() {
 }
 
 function fold() {
-    if (GAMEINPROGRESS === false) return;
+    // if (GAMEINPROGRESS === false) return;
     // if (confirm('Are you sure you want to fold?') === true) { 
     //     // do nothing
     // } else { return; };
@@ -121,6 +156,7 @@ function fold() {
     scoring.scoreHand(playerHand);                  // TODO remove
     
     GAMEINPROGRESS = false;
+    callButton.style.display = "none";
     playerHand, dealerHand = { };
     playerCards.parentNode.removeChild(playerCards);
     dealerCards.parentNode.removeChild(dealerCards);
@@ -135,6 +171,9 @@ function hideAllDisplayElements() {
 }
 
 function call() {
+    GAMEINPROGRESS = false;
+    foldButton.style.display = "none";
+    callButton.style.display = "none";
     showDealerHand();
     const playerScore = scoring.scoreHand(playerHand); 
     const dealerScore = scoring.scoreHand(dealerHand);

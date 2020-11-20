@@ -87,7 +87,6 @@ export function scoreHand(hand){
         if (value === true) { score.result = key }
     }
     
-    console.count("Object values: " + Object.values(score));
     if (!Object.values(score).includes(true)) {                             // if nothing, declare high card
         score.result = setHighCardResult(score.highCard);
     }

@@ -1,31 +1,3 @@
-// functions 
-
-export function getShuffledDeck() { 
-    return randomize(deck);
-}
-
-export function createHand() {               // creates five-card hands
-    var hand = new Array;
-    for (let i = 0; i < 5; i++ ) {
-        hand.push(deck.pop());
-    }
-    return hand;
-}
-
-// utilities etc. 
-
-function randomize(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-    while (0 !== currentIndex) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-    return array;
-}
-
 // cards
 
 export const spades2 = {
@@ -392,7 +364,7 @@ export const heartsAce = {
     value: 14
 }
 
-var deck =  [spades2, spades3, spades4, spades5,
+export const allCards = [spades2, spades3, spades4, spades5,
     spades6, spades7, spades8, spades9, spades10, 
     spadesJack, spadesQueen, spadesKing, spadesAce, 
     clubs2, clubs3, clubs4, clubs5,
