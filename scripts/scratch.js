@@ -1,23 +1,57 @@
-// else if (cardCountArray.includes(2) && !cardCountArray.includes(3)) {   // pair or two pair
-//   for (let value of cardCountArray) {                                 
-//       let s = new Set;
-//       if (value === 2) {
-//           s.add(value);
-//       }
-//       if (s.size === 2) {                                             // two pair
-//           score.twoPair = true;
-//           score.highCard = s[0];
-//           score.secondHighCard = s[1];
-//       }
-//       else {                                                          // pair
-//           score.pair = true; 
-//           score.highCard = getHighValue(cardCounts, 2);
-//       };
+let element1 = "foo";
+let element2 = "bar";
+let element3 = "pig";
+
+// console.log(element1), console.log(element2), etc. 
+
+// for (let x = 1; x < 4; x++) {
+//     let myReference = "element" + x;    
+//     var f = new Function("console.log(" + myReference + ");");
 // }
 
-let set = new Set;
-set.add("foo");
-set.add("bar");
-let setValues = set.values();
-console.log(setValues.next().value);
-console.log(setValues.next().value);
+let myReference = "element" + x;    
+var f = new Function("console.log("foo")");
+// var f = new Function("console.log(" + myReference + ");");
+console.log(f);
+
+    // console.log(myReference);
+    // console.log(element${x});
+
+
+
+// var f = new Function('name', 'return alert("hello, " + name + "!");');
+// f('erick');
+
+// for (let x = 1; x < 4; x++) {
+//     let myReference = "element" + x;
+//     console.log(myReference);
+//     // console.log(element${x});
+// }
+
+// var createFunction = () => { 
+//     return function () {
+//         console.log("You are that pig.");
+//     }
+//  }
+
+//  createFunction();
+//  generatedFunction();
+
+
+/*
+var f = new Function('name', 'return alert("hello, " + name + "!");');
+f('erick');
+
+
+You create a function that returns a function:
+
+function createStateManager(playerId) {
+    return function (newState) {
+        ytpStateHelper(playerId , newState);
+    }
+}
+Then you call your function factory when setting up the event listener:
+
+var player = document.getElementById(playerId);
+player.addEventListener("onStateChange", createStateManager(playerId));
+*/

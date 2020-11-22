@@ -71,23 +71,25 @@ export function scoreHand(hand){
         score.threeOfAKind = true;
         score.highCard = getHighValue(cardCounts, 3); }
     else if (cardCountArray.includes(2) && !cardCountArray.includes(3)) {   // pair or two pair
-        for (let value of cardCountArray) {                                 
-            let s = new Set;
+        let s = new Set;
+        for (let [key, value] of Object.entries(cardCounts)) {
             if (value === 2) {
-                s.add(value);
+                s.add(key);
             }
-            if (s.size === 2) {                                             // two pair
-                score.twoPair = true;
-                let sValues = s.values();
-                score.highCard = sValues.next().value;
-                score.secondHighCard = sValues.next().value;
-            }
-            else {                                                          // pair
-                score.pair = true; 
-                score.highCard = getHighValue(cardCounts, 2);
-            }
-        } 
-    }
+        }
+        if (s.size === 2) {                                             // two pair
+            score.twoPair = true;
+            let sValues = s.values();
+            let a = Array.from(s);
+            a.sort((a, b) => a-b);
+            score.secondHighCard = a[0];
+            score.highCard = a[1];
+        }
+        else {                                                        // pair
+            score.pair = true; 
+            score.highCard = getHighValue(cardCounts, 2);
+        }
+    } 
     else score.highCard = valuesArray[valuesArray.length-1];                // high card in hand;
 
     for (const [key, value] of Object.entries(score)) {                     // return hand result
