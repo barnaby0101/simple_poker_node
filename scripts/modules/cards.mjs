@@ -1,16 +1,3 @@
-export function getShuffledDeck() { 
-    var cards = Array.from(allCards);
-    var currentIndex = cards.length, temporaryValue, randomIndex;
-    while (0 !== currentIndex) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = cards[currentIndex];
-        cards[currentIndex] = cards[randomIndex];
-        cards[randomIndex] = temporaryValue;
-    }
-    return cards;
-}
-
 // cards
 
 export const spades2 = {
@@ -389,3 +376,16 @@ const allCards = [spades2, spades3, spades4, spades5,
     hearts2, hearts3, hearts4, hearts5,
     hearts6, hearts7, hearts8, hearts9, hearts10, 
     heartsJack, heartsQueen, heartsKing, heartsAce];
+
+export function getShuffledDeck() { 
+    var cards = Array.from(allCards);
+    var currentIndex = cards.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = cards[currentIndex];
+        cards[currentIndex] = cards[randomIndex];
+        cards[randomIndex] = temporaryValue;
+    }
+    return cards;
+}

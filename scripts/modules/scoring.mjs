@@ -14,52 +14,115 @@ export function scoreHand(hand){
     var valuesArray = new Array;
     var suitsArray = new Array;
     var cardCounts = new Object;
+    var suitCounts = new Object;
     
     var score = {
         royalStraightFlush: false,
         straightFlush: false,
         fourOfAKind: false, 
         fullHouse: false,
-        flush: true,
-        straight: true,
+        flush: false,
+        straight: false,
         threeOfAKind: false,
         twoPair: false,
-        highCard: false,        // if you have three 7s, this is 7. If you're queen-high, this is 12.
-        secondHighCard: false,  // for resolving two pair vs. two pair
         pair: false,
+        highCard: false,        // if you have three 7s, this is 7. If you're queen-high, this is 12.
+        
+        nearFlush: false,       // four cards same suit
+        nearFlushSuit: false,
+        nearStraight: false,    // four cards in sequence
+        secondHighCard: false,  // for resolving two pair vs. two pair
+        
         result: false,
         value: 0
     }
 
-    for (let i = 0; i < hand.length; i++) {             // creates arrays of suits and values
-        valuesArray.push(hand[i].value);                // in hand
+    // setup - create various structures for testing
+
+    for (let i = 0; i < hand.length; i++) {             // arrays of suits and values in hand
+        valuesArray.push(hand[i].value);
         suitsArray.push(hand[i].suit);
     }
 
-    for (var i = 0; i < valuesArray.length; i++) {      // creates cardCounts object that stores counts of 2s, 3s, etc in hand
-        var num = valuesArray[i];                       // example: {7: 1, 8: 1, 10: 2, 13: 1} is pair of 10s, king, 8, 7
+    valuesArray.sort((a, b) => a-b);                            // sort valuesArray in ascending order
+    score.highCard = valuesArray[valuesArray.length-1];   // set high card initial value
+
+    for (var i = 0; i < valuesArray.length; i++) {      // cardCounts objects stores counts of each value
+        var num = valuesArray[i];                       // example: {7: 1, 8: 1, 10: 2, 13: 1}
         cardCounts[num] = cardCounts[num] ? cardCounts[num] + 1 : 1;
-      }
-
-    valuesArray.sort((a, b) => a-b);                    // sort valuesArray in ascending order
-    
-    for (let i = 0; i < valuesArray.length-1; i++) {    // test for straight
-        if (valuesArray[i+1] - valuesArray[i] !== 1) {
-            score.straight = false;
-        } else { score.highCard = valuesArray[valuesArray.length-1]; }
     }
 
-    for (let i = 0; i < suitsArray.length-1; i++) {     // test for flush
-        if (suitsArray[i+1] !== suitsArray[i]) {
-            score.flush = false;
-        } else { score.highCard = valuesArray[valuesArray.length-1]; }
+    for (var i = 0; i < suitsArray.length; i++) {       // suitCounts object stores counts of each suit
+        var suit = suitsArray[i];                       
+        suitCounts[suit] = suitCounts[suit] ? suitCounts[suit] + 1 : 1;
     }
 
-    if (score.straight === true && score.flush === true ) { score.straightFlush = true };            // straight flush
-    if (score.straightFlush === true && score.highCard === 14) { score.royalStraightFlush = true };  // royal straight flush
+    // first tests
+    // the first set of tests check for royal straight flush, straight flush, flush, straight,
+    // near flush, or near straight
 
-    const cardCountArray = Object.values(cardCounts);                            // four of a kind
-    if (cardCountArray.includes(4)) { 
+    for (let [key, value] of Object.entries(suitCounts)) {          // test for flush or near flush
+        if (value === 5) {
+            score.flush = true;
+        }
+        if (value === 4) {
+            score.nearFlush = true;
+            score.nearFlushSuit = key;
+        }
+    }  
+
+    const cardCountArray = Object.values(cardCounts);               // used below
+
+    let vLen = valuesArray.length-1;                                // straight or near straight
+    let straightCountIndex = 0;
+
+    for (let i = 0; i < vLen; i++) {                 
+        if (valuesArray[i+1] - valuesArray[i] === 1) {
+            straightCountIndex++;
+            if (straightCountIndex === 3) {
+                if (score.flush !== true) {                         // if we have a flush, we don't care about 
+                score.nearStraight = true                           // near straights
+                }
+            };
+            if (straightCountIndex === 4) {
+                score.straight = true
+                score.nearStraight = false;                         // straight trumps near straight
+                score.nearFlush = false;                            // no longer care
+            };
+        } else {
+            straightCountIndex = 0;
+        }
+    }
+    if (score.straight === true && score.flush === true ) {                // straight flush
+        score.straightFlush = true 
+        score.flush = false;
+        score.straight = false;
+    }
+    // console.log("score.straightFlush")
+    // console.log(score.straightFlush)
+    // console.log("score.highCard")
+    // console.log(score.highCard)
+    // console.log("valuesArray[4]")
+    // console.log(valuesArray[4])
+    // console.log("parseInt(score.highCard)")
+    // console.log(parseInt(score.highCard));
+    if (score.straightFlush === true && parseInt(score.highCard) === 14) {     // royal straight flush
+        score.royalStraightFlush = true;
+        score.straightFlush = false;
+        score.flush = false;
+        score.straight = false;
+    }
+    if (score.result === "nearStraight") {              // set highCard to the card dealer will trade in
+        if ((valuesArray[1] - valuesArray[0]) > 1) {    // the non-matching card must be either first or last
+            score.highCard = valuesArray[0];
+        } else score.highCard = valuesArray[4];
+    }    
+
+    // second tests
+    // the second set of tests check for four of a kind, full house, three of a kind, two pair,
+    // pair, or high card
+
+    else if (cardCountArray.includes(4)) {                                      // four of a kind
         score.fourOfAKind = true;
         score.highCard = getHighValue(cardCounts, 4);
     }                                        
@@ -67,17 +130,17 @@ export function scoreHand(hand){
         score.fullHouse = true;
         score.highCard = getHighValue(cardCounts, 3);
     }
-    else if (cardCountArray.includes(3) && !cardCountArray.includes(2)) {      // three of a kind
+    else if (cardCountArray.includes(3) && !cardCountArray.includes(2)) {       // three of a kind
         score.threeOfAKind = true;
         score.highCard = getHighValue(cardCounts, 3); }
-    else if (cardCountArray.includes(2) && !cardCountArray.includes(3)) {   // pair or two pair
+    else if (cardCountArray.includes(2) && !cardCountArray.includes(3)) {       // pair or two pair
         let s = new Set;
         for (let [key, value] of Object.entries(cardCounts)) {
             if (value === 2) {
                 s.add(key);
             }
         }
-        if (s.size === 2) {                                             // two pair
+        if (s.size === 2) {                                         // two pair
             score.twoPair = true;
             let sValues = s.values();
             let a = Array.from(s);
@@ -85,26 +148,27 @@ export function scoreHand(hand){
             score.secondHighCard = a[0];
             score.highCard = a[1];
         }
-        else {                                                        // pair
+        else {                                                      // pair
             score.pair = true; 
             score.highCard = getHighValue(cardCounts, 2);
         }
     } 
-    else score.highCard = valuesArray[valuesArray.length-1];                // high card in hand;
+    else score.highCard = valuesArray[valuesArray.length-1];        // high card in hand;
 
-    for (const [key, value] of Object.entries(score)) {                     // return hand result
+    for (const [key, value] of Object.entries(score)) {             // return hand result
         if (value === true) { score.result = key }
     }
     
-    if (!Object.values(score).includes(true)) {                             // if nothing, declare high card
+    if (!Object.values(score).includes(true)) {     // if nothing, declare high card
         score.result = setHighCardResult(score.highCard);
     }
 
-    score = computeScoreValue(score);                                       // calculate hand score.value
+    score = computeScoreValue(score);               // calculate hand score.value
     return score;
 }
 
-function computeScoreValue(score){
+function computeScoreValue(score){                  // see top of file for description
+
     score.value += parseInt(score.highCard);
     switch(score.result) {
         case "pair": 
