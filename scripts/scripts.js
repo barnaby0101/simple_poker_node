@@ -1,12 +1,32 @@
 "use strict";
 
+/*
+  TODO 
+    * update console.log
+    * keep cards fixed in position after trade-ins
+    * add discard animation
+    * add Settings menu with a checkbox for mute
+    * fix issues with discard selection                 CHECK
+    * verify score is working properly                  CHECK
+    * rationalize button display                        CHECK
+*/
+
+
 import * as cards from "./modules/cards.mjs";
 import * as scoring from "./modules/scoring.mjs";
 
 var deck, playerHand, dealerHand, tradeInArray = new Array;
 var playerCard1, playerCard2, playerCard3, playerCard4, playerCard5;
-var GAMEINPROGRESS = false;
-var DEALERHASTRADEDIN = false; 
+var GAME_IN_PROGRESS = false;
+var DEALER_HAS_TRADED_IN = false; 
+
+// audio
+const shuffleSoundEffect = new Audio("media/shuffle.wav");
+var MUTE = true;
+
+// test mode
+const TESTMODE = false;      // if true, forces dealerHand and playerHand to test values
+                             // warning - it's currently a bit buggy, refresh after each hand is finished
 
 // selector bindings
 const dealButton = document.querySelector("#dealButton");
@@ -24,17 +44,10 @@ foldButton.addEventListener("click", () =>  { fold(); } );
 callButton.addEventListener("click", () =>  { call(); } );
 tradeButton.addEventListener("click", () => { tradeInCards(); } );
 
-// audio
-const shuffleSoundEffect = new Audio("media/shuffle.wav");
-var MUTE = true;
-
-// test mode
-const TESTMODE = false;      // if true, forces dealerHand and playerHand to test values
-                             // warning - it's currently a bit buggy, refresh after each hand is finished
-
 // setup 
 
 hideAllDisplayElements();
+buttonDisplayInitial();
 
 if (TESTMODE === true) {
     let text = "Test Mode Active"
@@ -45,62 +58,56 @@ if (TESTMODE === true) {
 // Game Play
 
 function playGame() {
-    if (GAMEINPROGRESS === true) {
+    if (GAME_IN_PROGRESS === true) {
         if (confirm('Do you want to start a new hand?') === true) { 
             fold();
         } else { return; };
     }
 
     initializeGame();
-    console.log("Deck immediately after initialization: ")
-    console.log(deck);
-    GAMEINPROGRESS = true;
+    buttonDisplayHand();
+    GAME_IN_PROGRESS = true;
     console.log("New game started.");
-    foldButton.style.display = "inline";
 
-    deal();
-    updateMessage("Click up to four cards to trade in and click \"continue\".");
+    beginHand();
+    updateMessage("Click up to four cards to trade in and click \"Trade In Cards\".");
     
     prepareTradeIn();   
 }
 
-function deal() {
+function beginHand() {
     if (MUTE === false){
         let dealSoundEffect = shuffleSoundEffect.cloneNode()
         dealSoundEffect.play();
     }
 
-    if  (document.querySelector("#playerCards")) {          // if hand already exists, erase it
+    // deal
+    if (document.querySelector("#playerCards")) {           // if hand already exists, erase it
         playerCards.parentNode.removeChild(playerCards);
         dealerCards.parentNode.removeChild(dealerCards);
         messageDisplay.innerHTML = "";
     }
 
-    callButton.style.display = "inline";
-
-    if (TESTMODE === true) {                                // testmode forces dealer hand to testHand
+    if (TESTMODE === true) { 
         dealerHand = getDealerTestHand();
         playerHand = getPlayerTestHand();
     }
     else {
-        console.log("deck");// todo erase
-        console.log(deck);// todo erase
         playerHand = createHand(5);    
         dealerHand = createHand(5);
     }
     showPlayerHand();
-    showDealerHandHidden();
+    if (TESTMODE === true) { showDealerHand(); }
+        else { showDealerHandHidden(); }
     console.log("initial dealerHand:");
     console.log(dealerHand);
 }
 
 function createHand(numCards) {                             // creates n-card hands
     var hand = new Array;
-    for (let i = 0; i < numCards; i++ ) {
+    for (let i = 0; i < numCards; i++) {
         hand.push(deck.pop());
     }
-    // console.log("hand just after being built");//todo remove
-    // console.log(hand);//todo remove
     return hand;
 }
 
@@ -118,6 +125,22 @@ function showPlayerHand() {
     }
 }
 
+function showDealerHand() {
+    dealerHandDisplay.style.display = "block"; 
+    if (document.querySelector("#dealerCards")) {
+        dealerCards.parentNode.removeChild(dealerCards);        // erase current hand
+    }
+    let handList = document.createElement("ul");
+    dealerHandDisplay.appendChild(handList);
+    handList.id="dealerCards";
+
+    for (let i = 0; i < dealerHand.length; i++) {
+        let listItem = handList.appendChild(document.createElement("li"));
+        listItem.innerHTML = "<img src=.\\img\\cards\\" + dealerHand[i].img + " id=\"dealerCard" + [i+1] + "\">";
+        dealerCards.appendChild(listItem);
+    }
+}
+
 function showDealerHandHidden() {                          // draws 5 card backs
     dealerHandDisplay.style.display = "block";             // display hidden element
     let handList = document.createElement("ul");
@@ -131,90 +154,42 @@ function showDealerHandHidden() {                          // draws 5 card backs
     }   
 }
 
-function showDealerHand() {
-    dealerCards.parentNode.removeChild(dealerCards);        // erase current hand
-    let handList = document.createElement("ul");
-    dealerHandDisplay.appendChild(handList);
-    handList.id="dealerCards";
-    console.log(dealerCards);
-
-    for (let i = 0; i < dealerHand.length; i++) {
-        let listItem = handList.appendChild(document.createElement("li"));
-        listItem.innerHTML = "<img src=.\\img\\cards\\" + dealerHand[i].img + " id=\"dealerCard" + [i+1] + "\">";
-        dealerCards.appendChild(listItem);
-    }
-}
-
-function updateMessage(message) {
-    messageDisplay.style.display = "block";
-    messageDisplay.innerHTML = `${ message }`;
-}
-
-function prepareTradeIn() {
+function prepareTradeIn(){
     playerCard1 = document.querySelector("#playerCard1");
     playerCard2 = document.querySelector("#playerCard2");
     playerCard3 = document.querySelector("#playerCard3");
     playerCard4 = document.querySelector("#playerCard4");
     playerCard5 = document.querySelector("#playerCard5");
 
-    playerCard1.addEventListener("click", () => {           // click to remove <li> and card
-        tradeButton.style.display = "inline";
-        if (checkCardSwapMax() === false) return;
-        if (playerCard1.className === "selectedForDiscard") {
-            playerCard1.classList.remove("selectedForDiscard");
-            tradeInArray.pop();                             // TODO this only works if you undo what you've just selected
-        } else {
-            playerCard1.className="selectedForDiscard";
-            tradeInArray.push(playerCard1);
-        }
-    })
-    playerCard2.addEventListener("click", () => { 
-        tradeButton.style.display = "inline";
-        if (checkCardSwapMax() === false) return;
-        if (playerCard2.className === "selectedForDiscard") {
-            playerCard2.classList.remove("selectedForDiscard");
-            tradeInArray.pop();
-        } else {
-            playerCard2.className="selectedForDiscard";
-            tradeInArray.push(playerCard2);
-        }
-    })
-    playerCard3.addEventListener("click", () => { 
-        tradeButton.style.display = "inline";
-        if (checkCardSwapMax() === false) return;
-        if (playerCard3.className === "selectedForDiscard") {
-            playerCard3.classList.remove("selectedForDiscard");
-            tradeInArray.pop();
-        } else {
-            playerCard3.className="selectedForDiscard";
-            tradeInArray.push(playerCard3);
-        }
-    })
-    playerCard4.addEventListener("click", () => { 
-        tradeButton.style.display = "inline";
-        if (checkCardSwapMax() === false) return;
-        if (playerCard4.className === "selectedForDiscard") {
-            playerCard4.classList.remove("selectedForDiscard");
-            tradeInArray.pop();
-        } else {
-            playerCard4.className="selectedForDiscard";
-            tradeInArray.push(playerCard4);
-        }
-    })
-    playerCard5.addEventListener("click", () => { 
-        tradeButton.style.display = "inline";
-        if (checkCardSwapMax() === false) return;
-        if (playerCard5.className === "selectedForDiscard") {
-            playerCard5.classList.remove("selectedForDiscard");
-            tradeInArray.pop();
-        } else {
-            playerCard5.className="selectedForDiscard";
-            tradeInArray.push(playerCard5);
-        }
-    })
+    playerCard1.addEventListener("click", () => { prepareCardForTradeIn(playerCard1)} );
+    playerCard2.addEventListener("click", () => { prepareCardForTradeIn(playerCard2)} );
+    playerCard3.addEventListener("click", () => { prepareCardForTradeIn(playerCard3)} );
+    playerCard4.addEventListener("click", () => { prepareCardForTradeIn(playerCard4)} );
+    playerCard5.addEventListener("click", () => { prepareCardForTradeIn(playerCard5)} );
 }
 
-function tradeInCards() {
+function prepareCardForTradeIn(card) {                  // adds/removes card from tradeInArray upon card click
+    buttonDisplayPlayerTradeIn();
+    if (checkCardSwapMax() === false) {
+        if (card.className !== "selectedForDiscard") {
+            return;
+        }   
+    }
+    if (card.className === "selectedForDiscard") {      // if already selected, deselect
+        for (let i = 0; i < tradeInArray.length; i++) {
+            if (tradeInArray[i] === card) {
+                card.className="";
+                delete tradeInArray[i];
+            }
+        }
+    } else {
+        card.className="selectedForDiscard";
+        tradeInArray.push(card);
+    }
+}
+
+function tradeInCards() {                                   // called by "Trade In Cards" button
+    tradeInArray = tradeInArray.filter(function (card) { return card != null; });   // clear empty indices
     for (let i = 0; i < tradeInArray.length; i++) {         // remove display of discards
         let cardToRemove = tradeInArray[i];
         var cardParent = cardToRemove.parentElement;
@@ -252,24 +227,20 @@ function tradeInCards() {
         listItem.innerHTML = "<img src=.\\img\\cards\\" + replacementCards[i].img + " id=\"playerCard" + [i+1] + "\">";
         playerCards.appendChild(listItem);
     }
-    tradeButton.style.display = "none";
     tradeInArray = [];
 
     dealerTradeIn();
-    updateMessage("Call or fold!");
-    // setTimeout(() => { updateMessage("Call or fold!") }, 2000);
+    setTimeout(() => { updateMessage("Call or fold!") }, 2000);
 }
 
 function dealerTradeIn() {
-    DEALERHASTRADEDIN = true;
+    DEALER_HAS_TRADED_IN = true;
+    buttonDisplayHand();
     let dealerScore = scoring.scoreHand(dealerHand);
 
-// TODO ERASE BELOW
-    console.log("Dealer trade-in begun.")
-    console.log("Initial Dealer Score: ");    // TODO erase
-    console.log(dealerScore);       // TODO erase
-
-
+    if (TESTMODE === true) {
+        return;
+    }
     switch (dealerScore.result) {
         // hold on flush, full house, any straight or flush, or four of a kind
         case "royalStraightFlush":
@@ -309,10 +280,7 @@ function dealerTradeIn() {
             dealerTradeInCards();
             return;
         default:        // high card, near flush, or near straight
-            console.log("Final trade-in step begun."); // TODO remove
-            console.log(dealerScore);
             if (dealerScore.result === "nearFlush") {                // near flush
-                console.log("Near flush."); // TODO remove
                 for (let card of dealerHand) {
                     if (card.suit !== dealerScore.nearFlushSuit) {
                         tradeInArray.push(card);
@@ -323,7 +291,6 @@ function dealerTradeIn() {
                 }
             }
             else if (dealerScore.result === "nearStraight") {             // near straight
-                console.log("Near straight."); // TODO remove
                 for (let card of dealerHand) {
                     if (parseInt(card.value) === parseInt(dealerScore.highCard)) {
                         tradeInArray.push(card);
@@ -334,7 +301,6 @@ function dealerTradeIn() {
                 return;
             }
             else {                                                      // high card
-                console.log("High card."); // TODO remove
                 for (let card of dealerHand) {
                     if (parseInt(card.value) !== parseInt(dealerScore.highCard)) {
                         tradeInArray.push(card);
@@ -348,9 +314,6 @@ function dealerTradeIn() {
 }
 
 function dealerTradeInCards() {
-    console.log("tradeInArray"); // TODO remove
-    console.log(tradeInArray); // TODO remove
-
     for (let i = 0; i < tradeInArray.length; i++) {
         let cardToRemove = tradeInArray[i];
 
@@ -377,36 +340,20 @@ function dealerTradeInCards() {
     let replacementCards = createHand(tradeInArray.length);
     for (let i = 0; i < replacementCards.length; i++) {
         dealerHand.push(replacementCards[i]);
-    }
-
-    console.log("Replenished hand: "); // TODO remove
-    console.log(dealerHand) // TODO remove
-    
+    }    
     tradeInArray = [];
 }
 
-function fold() {
-    console.log("Player folded.")
-    GAMEINPROGRESS = false;
-    callButton.style.display = "none";
-    playerHand, dealerHand = { };
-    playerCards.parentNode.removeChild(playerCards);
-    dealerCards.parentNode.removeChild(dealerCards);
-    hideAllDisplayElements();
-}
-
 function call() {
-    if (DEALERHASTRADEDIN === false) {
+    if (DEALER_HAS_TRADED_IN === false) {
         dealerTradeIn();
-        // setTimeout(() => { updateMessage("Call when you're ready!") }, 2000);
-        updateMessage("Call when you're ready!");
+        setTimeout(() => { updateMessage("Call when you're ready!") }, 2000);
     }
 
-    GAMEINPROGRESS = false;
-    foldButton.style.display = "none";
-    callButton.style.display = "none";
+    GAME_IN_PROGRESS = false;
+    buttonDisplayShowdown();
     showDealerHand();
-    const playerScore = scoring.scoreHand(playerHand); 
+    const playerScore = scoring.scoreHand(playerHand);              // calculate score for each hand
     const dealerScore = scoring.scoreHand(dealerHand);
 
     // special handling when both players have two-pair
@@ -420,9 +367,16 @@ function call() {
     else if (playerScore.value > dealerScore.value ) {
         updateMessage("You win with " + getResultMessage(playerScore) + "! Play again?");
     } else updateMessage("I win with " + getResultMessage(dealerScore) + "! Play again?");
+}
 
-    console.log("final dealer score"); // TODO remove
-    console.log(dealerScore); // TODO remove
+function fold() {
+    console.log("Player folded.")
+    GAME_IN_PROGRESS = false;
+    playerHand, dealerHand = { };
+    playerCards.parentNode.removeChild(playerCards);
+    dealerCards.parentNode.removeChild(dealerCards);
+    hideAllDisplayElements();
+    buttonDisplayInitial();
 }
 
 // utilities
@@ -437,8 +391,13 @@ function initializeGame() {
     playerCard3 = "";
     playerCard4 = "";
     playerCard5 = "";
-    GAMEINPROGRESS = false;
-    DEALERHASTRADEDIN = false;
+    GAME_IN_PROGRESS = false;
+    DEALER_HAS_TRADED_IN = false;
+}
+
+function updateMessage(message) {
+    messageDisplay.style.display = "block";
+    messageDisplay.innerHTML = `${ message }`;
 }
 
 function hideAllDisplayElements() {
@@ -450,7 +409,43 @@ function hideAllDisplayElements() {
     callButton.style.display = "none";
 }
 
+function buttonDisplayInitial() {
+	dealButton.style.display = "inline";
+	foldButton.style.display = "none";
+	callButton.style.display = "none";
+	tradeButton.style.display = "none";
+}
+
+function buttonDisplayHand() {
+	dealButton.style.display = "none";
+	callButton.style.display = "inline";
+	foldButton.style.display = "inline";
+	tradeButton.style.display = "none";
+}
+
+function buttonDisplayPlayerTradeIn() {
+	dealButton.style.display = "none";
+	callButton.style.display = "inline";
+	foldButton.style.display = "inline";
+	tradeButton.style.display = "inline";
+}
+
+function buttonDisplayDealerTradeIn() {
+	dealButton.style.display = "inline";
+	foldButton.style.display = "none";
+	callButton.style.display = "none";
+	tradeButton.style.display = "none";
+}
+
+function buttonDisplayShowdown() {
+	dealButton.style.display = "inline";
+	callButton.style.display = "none";
+	foldButton.style.display = "none";
+	tradeButton.style.display = "none";
+}
+
 function checkCardSwapMax(){
+    tradeInArray = tradeInArray.filter(function (card) { return card != null; });   // clear empty indices
     if (tradeInArray.length === 4) {
         updateMessage("You've traded in the maximum number of cards - please click \"continue\".");
         return false;
@@ -578,16 +573,17 @@ function getPlayerTestHand() {
 function getDealerTestHand() {
     const royalStraightFlush = [ cards.spades10, cards.spadesJack, cards.spadesQueen, cards.spadesKing, cards.spadesAce ];
     const straightFlush = [ cards.spades9, cards.spades10, cards.spadesJack, cards.spadesQueen, cards.spadesKing ];
-    const flush = [ cards.spades7, cards.spadesJack, cards.spadesQueen, cards.spadesKing, cards.spadesAce ];
-    const nearFlush = [ cards.clubs7, cards.spadesJack, cards.spadesQueen, cards.spadesKing, cards.spadesAce ];
+    const fourOfAKind = [ cards.spades10, cards.clubs10, cards.hearts10, cards.diamonds10, cards.spadesAce ];
+    const fullHouse = [ cards.clubs10, cards.hearts10, cards.diamonds10, cards.spadesAce, cards.heartsAce ];
+    const flush = [ cards.spades3, cards.spades8, cards.spadesJack, cards.spadesKing, cards.spadesAce ];
+    const nearFlush = [ cards.clubs3, cards.spades6, cards.spades10, cards.spadesJack, cards.spadesAce ];
     const straight = [ cards.spades9, cards.clubs10, cards.diamondsJack, cards.heartsQueen, cards.spadesKing ];
     const nearStraight = [ cards.spades9, cards.clubs10, cards.diamondsJack, cards.heartsQueen, cards.spades2 ];
-    const fourOfAKind = [ cards.spades10, cards.clubs10, cards.hearts10, cards.diamonds10, cards.spadesAce ];
     const threeOfAKind = [ cards.spades2, cards.clubs10, cards.hearts10, cards.diamonds10, cards.spadesAce ];
     const twoPair = [ cards.spades2, cards.clubs2, cards.hearts10, cards.diamonds10, cards.spadesAce ];
     const pair = [ cards.spades2, cards.clubs2, cards.hearts7, cards.diamonds9, cards.spadesAce ];
     const highCard = [ cards.spades2, cards.clubs4, cards.hearts7, cards.diamonds9, cards.spadesKing ];
 
-    let dealerHandToReturn = straight; 
+    let dealerHandToReturn = pair;      // set test hand here
     return dealerHandToReturn;
 }

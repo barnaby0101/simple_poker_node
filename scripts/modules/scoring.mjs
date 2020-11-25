@@ -1,6 +1,7 @@
 /*
-    The two primary functions are scoreHand() and computeScoreValue(). scoreHand() figures
-    out what kind of hand it is and writes the result to the object `score`. 
+    The two primary functions are scoreHand() and computeScoreValue(). 
+    
+    scoreHand() figures out what kind of hand it is and writes the result to the object `score`. 
 
     computeScoreValue() calculates a numerical value from the score for comparison. The value
     is of the form XXYY where XX is a ranked value for the hand type (e.g. three of a kind is 40, pair is 20)
@@ -26,7 +27,7 @@ export function scoreHand(hand){
         threeOfAKind: false,
         twoPair: false,
         pair: false,
-        highCard: false,        // if you have three 7s, this is 7. If you're queen-high, this is 12.
+        highCard: false,        // For queen-high, this is 12. For three 7s, this is 7. 
         
         nearFlush: false,       // four cards same suit
         nearFlushSuit: false,
@@ -34,26 +35,28 @@ export function scoreHand(hand){
         secondHighCard: false,  // for resolving two pair vs. two pair
         
         result: false,
-        value: 0
+        value: 0                // set by computeScoreValue()
     }
 
     // setup - create various structures for testing
 
-    for (let i = 0; i < hand.length; i++) {             // arrays of suits and values in hand
-        valuesArray.push(hand[i].value);
-        suitsArray.push(hand[i].suit);
+    for (let i = 0; i < hand.length; i++) {
+        valuesArray.push(hand[i].value);                    // array of card values in hand (for straights, etc)
+        suitsArray.push(hand[i].suit);                      // array of card suits in hand (for flushes, etc)
     }
+    valuesArray.sort((a, b) => a-b);                        // sorts valuesArray in ascending order
 
-    valuesArray.sort((a, b) => a-b);                            // sort valuesArray in ascending order
-    score.highCard = valuesArray[valuesArray.length-1];   // set high card initial value
+    score.highCard = valuesArray[valuesArray.length-1];     // sets high card initial value
 
-    for (var i = 0; i < valuesArray.length; i++) {      // cardCounts objects stores counts of each value
-        var num = valuesArray[i];                       // example: {7: 1, 8: 1, 10: 2, 13: 1}
-        cardCounts[num] = cardCounts[num] ? cardCounts[num] + 1 : 1;
-    }
+    for (var i = 0; i < valuesArray.length; i++) {          // cardCounts objects stores counts of each value
+            var num = valuesArray[i];                       // example: {2: 1, 5: 1, 10: 2, 13: 1} = pair of 10s
+            cardCounts[num] = cardCounts[num] ? cardCounts[num] + 1 : 1;
+        }
 
-    for (var i = 0; i < suitsArray.length; i++) {       // suitCounts object stores counts of each suit
-        var suit = suitsArray[i];                       
+    const cardCountArray = Object.values(cardCounts);       // used for four of a kind, three of a kind, etc.
+
+    for (var i = 0; i < suitsArray.length; i++) {           // suitCounts object stores counts of each suit
+        var suit = suitsArray[i];                           // used to identify what to discard in a near flush
         suitCounts[suit] = suitCounts[suit] ? suitCounts[suit] + 1 : 1;
     }
 
@@ -70,8 +73,6 @@ export function scoreHand(hand){
             score.nearFlushSuit = key;
         }
     }  
-
-    const cardCountArray = Object.values(cardCounts);               // used below
 
     let vLen = valuesArray.length-1;                                // straight or near straight
     let straightCountIndex = 0;
@@ -93,28 +94,20 @@ export function scoreHand(hand){
             straightCountIndex = 0;
         }
     }
-    if (score.straight === true && score.flush === true ) {                // straight flush
+    if (score.straight === true && score.flush === true ) {                     // straight flush
         score.straightFlush = true 
         score.flush = false;
         score.straight = false;
     }
-    // console.log("score.straightFlush")
-    // console.log(score.straightFlush)
-    // console.log("score.highCard")
-    // console.log(score.highCard)
-    // console.log("valuesArray[4]")
-    // console.log(valuesArray[4])
-    // console.log("parseInt(score.highCard)")
-    // console.log(parseInt(score.highCard));
     if (score.straightFlush === true && parseInt(score.highCard) === 14) {     // royal straight flush
         score.royalStraightFlush = true;
         score.straightFlush = false;
         score.flush = false;
         score.straight = false;
     }
-    if (score.result === "nearStraight") {              // set highCard to the card dealer will trade in
-        if ((valuesArray[1] - valuesArray[0]) > 1) {    // the non-matching card must be either first or last
-            score.highCard = valuesArray[0];
+    if (score.result === "nearStraight") {              // For near straight, set highCard to the card dealer will trade in.
+        if ((valuesArray[1] - valuesArray[0]) > 1) {    // Because the array is sorted, the non-matching card will always be
+            score.highCard = valuesArray[0];            // either first or last.
         } else score.highCard = valuesArray[4];
     }    
 
@@ -155,20 +148,19 @@ export function scoreHand(hand){
     } 
     else score.highCard = valuesArray[valuesArray.length-1];        // high card in hand;
 
-    for (const [key, value] of Object.entries(score)) {             // return hand result
+    for (const [key, value] of Object.entries(score)) {             // set hand result in score object
         if (value === true) { score.result = key }
     }
     
-    if (!Object.values(score).includes(true)) {     // if nothing, declare high card
+    if (!Object.values(score).includes(true)) {                     // if nothing, declare high card
         score.result = setHighCardResult(score.highCard);
     }
 
-    score = computeScoreValue(score);               // calculate hand score.value
+    score = computeScoreValue(score);               // calculate score.value for hand
     return score;
 }
 
 function computeScoreValue(score){                  // see top of file for description
-
     score.value += parseInt(score.highCard);
     switch(score.result) {
         case "pair": 
@@ -196,7 +188,7 @@ function computeScoreValue(score){                  // see top of file for descr
             score.value += 9000;
             break;
         case "royalStraightFlush": 
-            score.value += 2000;
+            score.value += 10000;
             break;
         default:				    // high-card hands
             score.value += 1000;
@@ -209,8 +201,8 @@ function computeScoreValue(score){                  // see top of file for descr
 
 // Utilities etc.
 
-function getHighValue(cardCounts, numberCardsInWinningPattern){         // eg for the value of a three of a kind, second argument is 3
-    for (let [key, value] of Object.entries(cardCounts)) {
+function getHighValue(cardCounts, numberCardsInWinningPattern){         // eg for the value of a three of a kind, 
+    for (let [key, value] of Object.entries(cardCounts)) {              // second argument is 3
         if (value === numberCardsInWinningPattern) { return key }
     }
 }
