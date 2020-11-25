@@ -2,10 +2,10 @@
 
 /*
   TODO 
-    * update console.log
-    * keep cards fixed in position after trade-ins
     * add discard animation
     * add Settings menu with a checkbox for mute
+    * update console.log
+    * keep cards fixed in position after trade-ins      CHECK
     * fix issues with discard selection                 CHECK
     * verify score is working properly                  CHECK
     * rationalize button display                        CHECK
@@ -65,6 +65,7 @@ function playGame() {
     }
 
     initializeGame();
+
     buttonDisplayHand();
     GAME_IN_PROGRESS = true;
     console.log("New game started.");
@@ -113,6 +114,9 @@ function createHand(numCards) {                             // creates n-card ha
 
 function showPlayerHand() {
     playerHandDisplay.style.display = "block";
+    if (document.querySelector("#playerCards")) {
+        playerCards.parentNode.removeChild(playerCards);        // erase current hand
+    }
     let handList = document.createElement("ul");
     playerHandDisplay.appendChild(handList);
     handList.id="playerCards";
@@ -192,43 +196,44 @@ function tradeInCards() {                                   // called by "Trade 
     tradeInArray = tradeInArray.filter(function (card) { return card != null; });   // clear empty indices
     for (let i = 0; i < tradeInArray.length; i++) {         // remove display of discards
         let cardToRemove = tradeInArray[i];
-        var cardParent = cardToRemove.parentElement;
-        cardParent.parentNode.removeChild(cardParent);
+        
         switch (cardToRemove) {                             // remove discards from hand
             case playerCard1: 
-                delete playerHand[0];
+                playerHand[0] = "noCard";
+                // playerCard1.className="animateDiscard";
                 break;
             case playerCard2: 
-                delete playerHand[1];
+                playerHand[1] = "noCard";
+                // playerCard2.className="animateDiscard";
                 break;
             case playerCard3: 
-                delete playerHand[2];
+                playerHand[2] = "noCard";
+                // playerCard3.className="animateDiscard";
                 break;
             case playerCard4: 
-                delete playerHand[3];
+                playerHand[3] = "noCard";
+                // playerCard4.className="animateDiscard";
                 break;
             case playerCard5: 
-                delete playerHand[4];
+                playerHand[4] = "noCard";
+                // playerCard5.className="animateDiscard";
                 break;
         }
     }
-    playerHand = playerHand.filter(function (card) { return card != null; });   // clear empty indices of hand
 
-    let replacementCards = createHand(tradeInArray.length);
-    for (let i = 0; i < replacementCards.length; i++) {
-        playerHand.push(replacementCards[i]);
-    }
-    
-    let handList = document.createElement("ul");
-    dealerHandDisplay.appendChild(handList);
+    let replacementCards = createHand(tradeInArray.length);     // update cards in hand
 
     for (let i = 0; i < replacementCards.length; i++) {
-        let listItem = handList.appendChild(document.createElement("li"));
-        listItem.innerHTML = "<img src=.\\img\\cards\\" + replacementCards[i].img + " id=\"playerCard" + [i+1] + "\">";
-        playerCards.appendChild(listItem);
+        for (let j = 0; j < playerHand.length; j++) {
+            if (playerHand[j] === "noCard") {
+                playerHand[j] = replacementCards[i];
+                break;
+            }
+        }
     }
+
+    showPlayerHand();                                       // redraw hand
     tradeInArray = [];
-
     dealerTradeIn();
     // setTimeout(() => { updateMessage("Call or fold!") }, 2000);
 }
@@ -355,17 +360,6 @@ function call() {
     showDealerHand();
     const playerScore = scoring.scoreHand(playerHand);              // calculate score for each hand
     const dealerScore = scoring.scoreHand(dealerHand);
-
-    // TODO REMOVE BELOW
-    console.log("dealerHand");
-    console.log(dealerHand);
-    console.log("playerHand");
-    console.log(playerHand);
-
-    console.log("dealerScore");
-    console.log(dealerScore);
-    console.log("playerScore");
-    console.log(playerScore);
 
     // special handling when both players have two-pair
     // if the high pair is the same, checks the low pair

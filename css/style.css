@@ -12,7 +12,6 @@ img {
 li { 
     list-style-type: none;
     display: inline;
-    
 }
 
 button {
@@ -39,4 +38,17 @@ button {
     border: 2px solid rgb(224, 10, 10);
     padding: 8px;
     border-radius: 10%;
+    /* position: relative; */
 }
+/* 
+.animateDiscard {
+    position: relative;
+    animation-name: discardAnimation;
+    animation-duration: 4s;
+}
+
+@keyframes discardAnimation {
+    0%   {left:0px; top:0px;}
+    25%  {left:300px; top:300px;}
+    50%  {left:400px; top:800px;}
+} */
