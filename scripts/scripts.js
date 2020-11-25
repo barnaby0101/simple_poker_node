@@ -230,7 +230,7 @@ function tradeInCards() {                                   // called by "Trade 
     tradeInArray = [];
 
     dealerTradeIn();
-    setTimeout(() => { updateMessage("Call or fold!") }, 2000);
+    // setTimeout(() => { updateMessage("Call or fold!") }, 2000);
 }
 
 function dealerTradeIn() {
@@ -355,6 +355,17 @@ function call() {
     showDealerHand();
     const playerScore = scoring.scoreHand(playerHand);              // calculate score for each hand
     const dealerScore = scoring.scoreHand(dealerHand);
+
+    // TODO REMOVE BELOW
+    console.log("dealerHand");
+    console.log(dealerHand);
+    console.log("playerHand");
+    console.log(playerHand);
+
+    console.log("dealerScore");
+    console.log(dealerScore);
+    console.log("playerScore");
+    console.log(playerScore);
 
     // special handling when both players have two-pair
     // if the high pair is the same, checks the low pair

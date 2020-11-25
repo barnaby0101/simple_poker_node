@@ -1,3 +1,5 @@
+/*
+
 function prepareTradeIn() {
     playerCard1 = document.querySelector("#playerCard1");
     playerCard2 = document.querySelector("#playerCard2");
@@ -66,7 +68,7 @@ var newFunction = new Function ('bar', 'console.log("foo" + `${bar}`)');
 
 newFunction("bar");
 
-
+*/
 // function createPrepareTradeInFunction(card) {
 //     let new function {
 //         console.log("You are that " + ${card});
@@ -74,3 +76,42 @@ newFunction("bar");
 // }
 
 // console.log(createPrepareTradeInFunction("pig"));
+
+
+
+
+playerCard1 = document.querySelector("#playerCard1");
+playerCard2 = document.querySelector("#playerCard2");
+playerCard3 = document.querySelector("#playerCard3");
+playerCard4 = document.querySelector("#playerCard4");
+playerCard5 = document.querySelector("#playerCard5");
+
+playerCard1.addEventListener("click", () => {           // click to remove <li> and card
+    tradeButton.style.display = "inline";
+    if (checkCardSwapMax() === false) return;           // TODO if you select four, you can't deselect one
+    if (playerCard1.className === "selectedForDiscard") {
+        playerCard1.classList.remove("selectedForDiscard");
+        tradeInArray.pop();                             // TODO deselecting a selected card only works if you undo what you've just selected
+    } else {
+        playerCard1.className="selectedForDiscard";
+        tradeInArray.push(playerCard1);
+    }
+})
+
+playerCard1.addEventListener("click", () => { prepareCardForTradeIn(playerCard1)} );
+playerCard2.addEventListener("click", () => { prepareCardForTradeIn(playerCard2)} );
+playerCard3.addEventListener("click", () => { prepareCardForTradeIn(playerCard3)} );
+playerCard4.addEventListener("click", () => { prepareCardForTradeIn(playerCard4)} );
+playerCard5.addEventListener("click", () => { prepareCardForTradeIn(playerCard5)} );
+
+function prepareCardForTradeIn(card) {
+    tradeButton.style.display = "inline";
+    if (checkCardSwapMax() === false) return;           // TODO if you select four, you can't deselect one
+    if (card.className === "selectedForDiscard") {
+        card.classList.remove("selectedForDiscard");
+        tradeInArray.pop();                             // TODO deselecting a selected card only works if you undo what you've just selected
+    } else {
+        card.className="selectedForDiscard";
+        tradeInArray.push(card);
+}
+
