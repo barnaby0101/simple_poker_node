@@ -1,17 +1,5 @@
 "use strict";
 
-/*
-  TODO 
-    * add discard animation
-    * add Settings menu with a checkbox for mute
-    * update console.log
-    * keep cards fixed in position after trade-ins      CHECK
-    * fix issues with discard selection                 CHECK
-    * verify score is working properly                  CHECK
-    * rationalize button display                        CHECK
-*/
-
-
 import * as cards from "./modules/cards.mjs";
 import * as scoring from "./modules/scoring.mjs";
 
@@ -106,8 +94,6 @@ function beginHand() {
     showPlayerHand();
     if (TESTMODE === true) { showDealerHand(); }
         else { showDealerHandHidden(); }
-    console.log("initial dealerHand:");
-    console.log(dealerHand);
 }
 
 function createHand(numCards) {                             // creates n-card hands
@@ -199,6 +185,7 @@ function prepareCardForTradeIn(card) {                  // adds/removes card fro
 }
 
 function tradeInCards() {                                   // called by "Trade In Cards" button
+    console.log(`Player traded in ${tradeInArray.length} cards.`)
     tradeInArray = tradeInArray.filter(function (card) { return card != null; });   // clear empty indices
     for (let i = 0; i < tradeInArray.length; i++) {         // remove display of discards
         let cardToRemove = tradeInArray[i];
@@ -335,6 +322,7 @@ function dealerTradeIn() {
 }
 
 function dealerTradeInCards() {
+    console.log(`Dealer traded in ${tradeInArray.length} cards.`)
     for (let i = 0; i < tradeInArray.length; i++) {
         let cardToRemove = tradeInArray[i];
 
@@ -377,12 +365,6 @@ function call() {
     const playerScore = scoring.scoreHand(playerHand);              // calculate score for each hand
     const dealerScore = scoring.scoreHand(dealerHand);
 
-    console.log("player score"); // TODO remove
-    console.log(playerScore); // TODO remove
-
-    console.log("dealer score"); // TODO remove
-    console.log(dealerScore); // TODO remove
-
     // special handling when both players have two-pair
     // if the high pair is the same, checks the low pair
     if ((playerScore.result === "twoPair") && (playerScore.value === dealerScore.value)) {
@@ -392,8 +374,14 @@ function call() {
     } 
     // any other case
     else if (playerScore.value > dealerScore.value ) {
-        updateMessage("You win with " + getResultMessage(playerScore) + "! Play again?");
-    } else updateMessage("I win with " + getResultMessage(dealerScore) + "! Play again?");
+        let text = getResultMessage(playerScore);
+        console.log(`Player wins with ${text}.`);
+        updateMessage("You win with " + text + "! Play again?");
+    } else {
+        let text = getResultMessage(dealerScore);
+        console.log(`Dealer wins with ${text}.`);
+        updateMessage("I win with " + text + "! Play again?");
+    }
 }
 
 function fold() {

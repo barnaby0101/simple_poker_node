@@ -1,1 +1,0 @@
-setTimeout(() => { console.log("delayed message"); }, 1000); 	// wait 1000 ms, then execute
