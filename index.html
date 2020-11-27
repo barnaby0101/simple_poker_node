@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
     <head>
-      <title>Poker</title>
+      <title>Poker Lounge</title>
       <meta charset="UTF-8">
       <meta name="description" content="">
       <meta name="author" content="Barnaby Thieme">
@@ -13,10 +13,11 @@
 
     <body>
       <header>
-        <h1>Poker Game</h1>
+        <h1 id="pageTitle">The Poker Lounge</h1>
       </header>
-      <main>
 
+      <main>
+        <br><br><br><br>
         <ul>
           <li><button id="dealButton" type="button">Deal!</button></li>
           <li><button id="callButton" type="button">Call</button></li>
@@ -24,16 +25,24 @@
           <li><button id="tradeButton" type="button">Trade In Cards</button></li>
         </ul> 
 
-        <div>
-          <h2 id="playerHandDisplay">Your cards:</h2>
-        </div>
 
-        <div>
-          <h2 id="dealerHandDisplay">Dealer's cards:</h2>
+        <div class="cardTable" id="cardTable">
+          <h2 id="playerHandDisplay" class="playerHandDisplay">Your cards:</h2>
+          <h2 id="dealerHandDisplay"  class="playerHandDisplay">Dealer's cards:</h2>
         </div>
 
         <h2 id="messageDisplay" class="messageDisplay"></h2>
 
+        <footer>
+          <div class="container">
+            <p id="settingsLink" class="settings">Settings</p>
+            <p id="settingsCheckbox" class="settings">
+              <input type="checkbox" id="mute" name="mute" value="mute">
+              <label for="mute">Mute</label>
+            </p>
+          </div>
+        </footer>
       </main>
+
     </body>
   </html>

@@ -143,6 +143,8 @@ export function scoreHand(hand){
         }
         else {                                                      // pair
             score.pair = true; 
+            score.nearFlush = false;
+            score.nearStraight = false;
             score.highCard = getHighValue(cardCounts, 2);
         }
     } 
