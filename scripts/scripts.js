@@ -21,6 +21,7 @@ const dealButton = document.querySelector("#dealButton");
 const foldButton = document.querySelector("#foldButton");
 const callButton = document.querySelector("#callButton");
 const tradeButton = document.querySelector("#tradeButton");
+const dealSoundEffect = shuffleSoundEffect.cloneNode();
 
 const playerHandDisplay = document.querySelector("#playerHandDisplay");
 const dealerHandDisplay = document.querySelector("#dealerHandDisplay");
@@ -72,7 +73,6 @@ function playGame() {
 
 function beginHand() {
     if (MUTE === false){
-        let dealSoundEffect = shuffleSoundEffect.cloneNode()
         dealSoundEffect.play();
     }
 

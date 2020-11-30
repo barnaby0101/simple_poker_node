@@ -3,6 +3,7 @@ body {
     background-image: url("../img/woodgrain.png");
     background-repeat: no-repeat;
     color: black;
+    width: 100%;
 }
 
 h1 {
@@ -12,17 +13,10 @@ h1 {
     left: 390px;
 }
 
-.container {
+/* .container {
     position: relative;
     width: 100%;
-}
-
-.settings {
-    position: absolute; 
-    left: 715px;
-    font-weight: bold;
-    cursor: pointer
-}
+} */
 
 img {
     width:100px;
@@ -78,4 +72,78 @@ button {
     border: 2px solid rgb(155, 32, 32);
     padding: 8px;
     border-radius: 10%;
+}
+
+.settings {
+    position: absolute; 
+    left: 715px;
+    font-weight: bold;
+    cursor: pointer
+}
+
+
+@media screen and (max-width: 375px) {
+    h1 {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        font-size: 2.0em;
+        position: inline; 
+        left: 25px;
+    }
+    
+    ul {
+        padding: 0;
+        list-style-type: none;
+    }
+
+    .buttons li { 
+        width: 20%;
+        max-width: 375px;
+        white-space: nowrap;
+    }
+
+    button {
+        font-size: 36px;
+        text-align: center;
+        margin: 10px 10px 10px 0px;
+    }
+
+    .cardTable {
+        position: absolute;
+        top: 280px;
+        width: 357px;
+        margin-left: 0px;
+        height: 400px;
+        padding: 0;
+    }
+
+    .playerHandDisplay {
+        padding: 5px;
+    }
+    
+    .dealerHandDisplay {
+        padding: 5px;
+    }
+
+    img {
+        width:49px;
+        margin: 0;
+        /* margin: 1px 1px 1px 1px; */
+        cursor: pointer
+    }
+
+    .messageDisplay {
+        position: absolute;
+        top: 675px;
+        padding: 8px;
+        font-size: 2.0em;
+    }
+
+    .settings {
+        position: absolute;
+        left: 15px;
+        bottom: 0px;
+        font-size: 1.5em;
+        font-weight: bold;
+        cursor: pointer
+    }
 }
