@@ -13,11 +13,6 @@ h1 {
     left: 390px;
 }
 
-/* .container {
-    position: relative;
-    width: 100%;
-} */
-
 img {
     width:100px;
     padding: 10px;
@@ -55,11 +50,7 @@ button {
     background-color:#35654d;
 }
 
-.playerHandDisplay {
-    padding: 15px;
-}
-
-.dealerHandDisplay {
+.cardDisplay {
     padding: 15px;
 }
 
@@ -79,6 +70,14 @@ button {
     left: 715px;
     font-weight: bold;
     cursor: pointer
+}
+
+.pageNotFound {
+    position: static;
+}
+
+.announce {
+    font-size: 1.2em;
 }
 
 

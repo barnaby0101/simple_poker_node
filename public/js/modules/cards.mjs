@@ -1,4 +1,3 @@
-
 // cards
 
 export const spades2 = {
