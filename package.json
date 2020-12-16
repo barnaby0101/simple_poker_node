@@ -1,0 +1,30 @@
+{
+  "name": "poker",
+  "version": "1.0.0",
+  "description": "A simple poker game.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/app.js -e js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barnaby0101/simple_poker.git"
+  },
+  "keywords": [
+    "poker",
+    "javascript",
+    "node"
+  ],
+  "author": "Barnaby Thieme",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/barnaby0101/simple_poker/issues"
+  },
+  "homepage": "https://github.com/barnaby0101/simple_poker#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

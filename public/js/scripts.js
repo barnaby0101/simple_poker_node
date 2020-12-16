@@ -45,8 +45,7 @@ displayInitial();
 updateMessage("Welcome to the Poker Lounge.")
 
 if (TESTMODE === true) { 
-    let text = "Test Mode Active"
-    pageTitle.innerHTML = text;
+    pageTitle.innerHTML = "Test Mode Active"
     pageTitle.style.color = "orange";
 }
 
@@ -66,15 +65,13 @@ function playGame() {
     console.log("New game started.");
 
     beginHand();
-    updateMessage("Click up to four cards to trade in.");
-    
+
+    updateMessage("Click up to four cards to trade in.");   
     prepareTradeIn();   
 }
 
 function beginHand() {
-    if (MUTE === false){
-        dealSoundEffect.play();
-    }
+    if (!MUTE) { dealSoundEffect.play(); }
 
     // deal
     if (document.querySelector("#playerCards")) {           // if hand already exists, erase it
@@ -83,16 +80,15 @@ function beginHand() {
         messageDisplay.innerHTML = "";
     }
 
-    if (TESTMODE === true) { 
+    if (TESTMODE === true) {                                // in test mode, load specified hands
         dealerHand = getDealerTestHand();
         playerHand = getPlayerTestHand();
-    }
-    else {
+    } else {
         playerHand = createHand(5);    
         dealerHand = createHand(5);
     }
     showPlayerHand();
-    if (TESTMODE === true) { showDealerHand(); }
+    if (TESTMODE === true) { showDealerHand(); }            // show dealer hand in test mode
         else { showDealerHandHidden(); }
 }
 
@@ -116,7 +112,7 @@ function showPlayerHand() {
     for (let i = 0; i < playerHand.length; i++) {
         let listItem = handList.appendChild(document.createElement("li"));
         // creates image refs and ids for card1 through card5
-        listItem.innerHTML = "<img src=.\\img\\cards\\" + playerHand[i].img + " id=\"playerCard" + [i+1] + "\">";
+        listItem.innerHTML = "<img src=\\..\\img\\cards\\" + playerHand[i].img + " id=\"playerCard" + [i+1] + "\">";
         playerCards.appendChild(listItem);
     }
 }
@@ -132,7 +128,7 @@ function showDealerHand() {
 
     for (let i = 0; i < dealerHand.length; i++) {
         let listItem = handList.appendChild(document.createElement("li"));
-        listItem.innerHTML = "<img src=.\\img\\cards\\" + dealerHand[i].img + " id=\"dealerCard" + [i+1] + "\">";
+        listItem.innerHTML = "<img src=\\..\\img\\cards\\" + dealerHand[i].img + " id=\"dealerCard" + [i+1] + "\">";
         dealerCards.appendChild(listItem);
     }
 }
@@ -145,7 +141,7 @@ function showDealerHandHidden() {                          // draws 5 card backs
 
     for (let i = 0; i < dealerHand.length; i++ ) {
         let listItem = handList.appendChild(document.createElement("li"));
-        listItem.innerHTML = "<img src=.\\img\\cards\\back.png" + " id=\"dealerCard" + [i+1] + "\">";
+        listItem.innerHTML = "<img src=\\..\\img\\cards\\back.png" + " id=\"dealerCard" + [i+1] + "\">";
         dealerCards.appendChild(listItem);
     }   
 }
@@ -228,7 +224,6 @@ function tradeInCards() {                                   // called by "Trade 
     showPlayerHand();                                       // redraw hand
     endPlayerTradeIn();
     dealerTradeIn();
-    // setTimeout(() => { updateMessage("Call or fold!") }, 2000);
 }
 
 function endPlayerTradeIn(){
@@ -365,8 +360,8 @@ function call() {
     const playerScore = scoring.scoreHand(playerHand);              // calculate score for each hand
     const dealerScore = scoring.scoreHand(dealerHand);
 
-    // special handling when both players have two-pair
-    // if the high pair is the same, checks the low pair
+    // if both players have two pair and the high pair is the same, 
+    // check the low pair
     if ((playerScore.result === "twoPair") && (playerScore.value === dealerScore.value)) {
         if (playerScore.secondHighCard > dealerScore.secondHighCard) {
             updateMessage("You win with " + getResultMessage(playerScore) + "! Play again?");
@@ -623,6 +618,6 @@ function getDealerTestHand() {
     const highCard = [ cards.clubsQueen, cards.spadesJack, cards.spades9, cards.spadesQueen, cards.spades4 ];
     const aribtrary = [ cards.spadesAce, cards.heartsQueen, cards.hearts3, cards.hearts5, cards.diamondsJack ];
 
-    let dealerHandToReturn = aribtrary;      // set test hand here
+    let dealerHandToReturn = royalStraightFlush;      // set test hand here
     return dealerHandToReturn;
 }
